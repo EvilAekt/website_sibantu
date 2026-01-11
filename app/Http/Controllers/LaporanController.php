@@ -127,31 +127,48 @@ class LaporanController extends Controller
             ->route('laporan.index')
             ->with('success', 'Laporan berhasil dihapus!');
     }
-
-    public function exportCSV(): StreamedResponse
+    public function exportCSV()
     {
-        return response()->streamDownload(function () {
-            $handle = fopen('php://output', 'w');
-            fputcsv($handle, [
-                'ID', 'Tracking Code', 'Nama Pelapor', 'Lokasi',
-                'Deskripsi', 'Jenis Bantuan', 'Status', 'Tanggal'
-            ]);
+        // Nama file saat didownload
+        $fileName = 'laporan_' . date('Ymd_His') . '.csv';
 
-            Laporan::chunk(100, function ($items) use ($handle) {
-                foreach ($items as $row) {
-                    fputcsv($handle, [
-                        $row->id,
-                        $row->tracking_code,
-                        $row->nama_pelapor,
-                        $row->lokasi,
-                        $row->deskripsi,
-                        $row->jenis_bantuan,
-                        ucfirst($row->status), // tampilan rapi
-                        $row->created_at->format('Y-m-d H:i:s'),
-                    ]);
-                }
-            });
-            fclose($handle);
-        }, 'laporan_' . now()->format('YmdHis') . '.csv');
+        // Header agar browser tahu ini file download CSV
+        $headers = [
+            "Content-Type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=\"$fileName\"",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        ];
+
+        // Nama-nama Kolom Header di file CSV
+        $columns = ['ID', 'Kode Tracking', 'Pelapor', 'Lokasi', 'Deskripsi', 'Jenis', 'Status', 'Tanggal'];
+
+        $callback = function() use ($columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns); // Tulis header
+
+            // Ambil semua data laporan dari database
+            // Pastikan Anda sudah use App\Models\Laporan; di paling atas file
+            $data = \App\Models\Laporan::all(); 
+
+            foreach ($data as $row) {
+                fputcsv($file, [
+                    $row->id,
+                    $row->tracking_code ?? '-', // Pakai ?? '-' biar ga error kalau kosong
+                    $row->nama_pelapor ?? 'Anonim',
+                    $row->lokasi,
+                    $row->deskripsi,
+                    $row->jenis_bantuan,
+                    $row->status,
+                    $row->created_at->format('Y-m-d H:i:s'),
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
+
+
 }

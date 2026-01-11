@@ -9,6 +9,8 @@ class Bantuan extends Model
 {
     use HasFactory;
 
+    protected $table = 'bantuan';
+    protected $guarded = [];
     protected $fillable = [
         'nama_bantuan',
         'kategori',

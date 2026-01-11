@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('laporan', function (Blueprint $table) {
             $table->id();
+            $table->string('tracking_code')->unique()->nullable();
             $table->string('nama_pelapor');
             $table->string('lokasi');
             $table->text('deskripsi');

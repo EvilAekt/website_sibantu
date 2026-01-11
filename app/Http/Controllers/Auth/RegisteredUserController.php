@@ -19,20 +19,21 @@ class RegisteredUserController extends Controller
         return view('auth.register-relawan');
     }
 
-    public function storeRelawan(Request $request): RedirectResponse
+  public function storeRelawan(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'nama' => ['required', 'string', 'max:255'], 
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'ktp' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
         ]);
 
-        // Simpan KTP
+      
         $ktpPath = $request->file('ktp')->store('ktp', 'public');
 
+        
         $user = User::create([
-            'name' => $request->name,
+            'nama' => $request->nama, 
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => 'relawan',

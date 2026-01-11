@@ -9,6 +9,7 @@ class Laporan extends Model
     protected $table = 'laporan';
 
     protected $fillable = [
+        'tracking_code',
         'nama_pelapor',
         'lokasi',
         'deskripsi',
