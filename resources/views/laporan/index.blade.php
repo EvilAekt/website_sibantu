@@ -1,207 +1,165 @@
 @extends('layouts.app')
 
-@section('title', 'Daftar Bantuan - SiBantu')
+@section('title', 'Laporan Bencana - SiBantu')
 
 @section('content')
-
-{{-- 1. STYLE ANIMASI & CSS KHUSUS HALAMAN INI --}}
-<style>
-    /* Animasi Fade In Up */
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(30px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    /* Animasi Shimmer (Kilau) pada Tombol */
-    @keyframes shimmer {
-        100% { transform: translateX(100%); }
-    }
-    /* Class Animasi */
-    .animate-fade-in {
-        animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        opacity: 0;
-    }
-    /* Hover Lift Effect */
-    .hover-lift {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .hover-lift:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.1);
-    }
-    
-    /* INPUT GLASS & DARK MODE FIX */
-    .glass-input {
-        background: #f9fafb;
-        border: 1px solid #d1d5db;
-        color: #1f2937;
-        transition: all 0.3s ease;
-    }
-    .dark .glass-input {
-        background: rgba(15, 23, 42, 0.6) !important;
-        border-color: rgba(59, 130, 246, 0.3);
-        color: #f3f4f6 !important;
-    }
-    .dark .glass-input::placeholder {
-        color: #9ca3af;
-    }
-    .glass-input:focus {
-        background: #ffffff;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-    }
-</style>
-
-{{-- Wrapper Utama --}}
-<div class="max-w-7xl mx-auto">
-
-    {{-- 2. HEADER SECTION (Judul Kiri, Tombol Kanan Bawah) --}}
-    <div class="flex flex-col md:flex-row justify-between items-end mb-10 mt-8 gap-6 animate-fade-in">
-        
-        {{-- KIRI: Judul & Deskripsi --}}
-        <div class="text-center md:text-left w-full md:w-auto">
-            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-blue-500 dark:from-blue-400 dark:to-blue-200 mb-2">
-                Daftar Laporan Bantuan
-            </h1>
-            <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed max-w-xl">
-                Pantau data laporan yang masuk secara real-time. Gunakan filter di bawah untuk mencari data spesifik.
-            </p>
-        </div>
-
-        {{-- KANAN: Tombol Export CSV (Posisi Turun Sedikit) --}}
-        @auth
-        <div class="w-full md:w-auto flex justify-center md:justify-end md:translate-y-2">
-            <a href="{{ route('laporan.exportCSV') }}" class="group relative inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-emerald-500/30 overflow-hidden">
-                {{-- Efek Kilau --}}
-                <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
-                
-                <i class="fas fa-file-csv text-lg"></i> 
-                <span class="font-semibold text-sm tracking-wide">Download CSV</span>
-            </a>
-        </div>
-        @endauth
-    </div>
-
-    {{-- 3. FILTER SECTION (Dark Mode Aman) --}}
-    <div class="glass-panel rounded-xl p-5 mb-8 shadow-sm animate-fade-in" style="animation-delay: 0.1s;">
-        <form action="{{ route('laporan.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4">
-            
-            {{-- Search (4 kolom) --}}
-            <div class="lg:col-span-4 relative">
-                <i class="fas fa-search absolute left-3 top-3 text-gray-400 dark:text-gray-400"></i>
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari pelapor atau lokasi..." 
-                       class="w-full pl-10 pr-4 py-2.5 rounded-lg glass-input focus:ring-2 focus:ring-blue-500 transition-all text-sm text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400">
-            </div>
-            
-            {{-- Jenis (2 kolom) --}}
-            <div class="lg:col-span-2 relative">
-                <select name="jenis" class="w-full pl-3 pr-8 py-2.5 rounded-lg glass-input text-sm appearance-none cursor-pointer dark:text-white dark:bg-gray-800/50">
-                    <option value="" class="text-gray-800 dark:bg-gray-800 dark:text-gray-200">Semua Jenis</option>
-                    <option value="pangan" {{ request('jenis') == 'pangan' ? 'selected' : '' }} class="text-gray-800 dark:bg-gray-800 dark:text-gray-200">Pangan (Sembako)</option>
-        
-        <option value="sandang" {{ request('jenis') == 'sandang' ? 'selected' : '' }} class="text-gray-800 dark:bg-gray-800 dark:text-gray-200">Sandang</option>
-        <option value="papan" {{ request('jenis') == 'papan' ? 'selected' : '' }} class="text-gray-800 dark:bg-gray-800 dark:text-gray-200">Papan</option>
-                    <option value="Kesehatan" {{ request('jenis') == 'Kesehatan' ? 'selected' : '' }} class="text-gray-800 dark:bg-gray-800 dark:text-gray-200">Kesehatan</option>
-                    <option value="Pendidikan" {{ request('jenis') == 'Pendidikan' ? 'selected' : '' }} class="text-gray-800 dark:bg-gray-800 dark:text-gray-200">Pendidikan</option>
-                </select>
-                <i class="fas fa-chevron-down absolute right-3 top-3 text-gray-400 dark:text-gray-300 text-xs pointer-events-none"></i>
-            </div>
-
-            {{-- Status (2 kolom) --}}
-            <div class="lg:col-span-2 relative">
-                <select name="status" class="w-full pl-3 pr-8 py-2.5 rounded-lg glass-input text-sm appearance-none cursor-pointer dark:text-white dark:bg-gray-800/50">
-                    <option value="" class="text-gray-800 dark:bg-gray-800 dark:text-gray-200">Semua Status</option>
-                    <option value="baru" {{ request('status') == 'baru' ? 'selected' : '' }} class="text-gray-800 dark:bg-gray-800 dark:text-gray-200">Baru</option>
-                    <option value="diproses" {{ request('status') == 'diproses' ? 'selected' : '' }} class="text-gray-800 dark:bg-gray-800 dark:text-gray-200">Diproses</option>
-                    <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }} class="text-gray-800 dark:bg-gray-800 dark:text-gray-200">Selesai</option>
-                </select>
-                <i class="fas fa-chevron-down absolute right-3 top-3 text-gray-400 dark:text-gray-300 text-xs pointer-events-none"></i>
-            </div>
-
-            {{-- Tanggal (2 kolom) --}}
-            <div class="lg:col-span-2 relative">
-                <input type="date" name="tanggal" value="{{ request('tanggal') }}" 
-                       class="w-full px-3 py-2.5 rounded-lg glass-input text-sm cursor-pointer dark:text-white dark:[color-scheme:dark]">
-            </div>
-
-            {{-- Tombol Filter (2 kolom) --}}
-            <div class="lg:col-span-2">
-                <button type="submit" class="w-full h-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg shadow-sm transition text-sm font-semibold flex items-center justify-center gap-2 transform active:scale-95">
-                    <i class="fas fa-filter"></i> Terapkan
-                </button>
-            </div>
-        </form>
-    </div>
-
-    {{-- 4. CARD GRID (Animasi Staggered) --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        @forelse($laporan as $index => $item)
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700 group hover-lift animate-fade-in"
-             style="animation-delay: {{ ($index * 0.1) + 0.2 }}s;">
-            
-            {{-- Foto --}}
-            <div class="relative h-48 bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60 group-hover:opacity-40 transition-opacity z-10"></div>
-                <img src="{{ asset('storage/' . $item->foto) }}" 
-                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($item->nama_pelapor) }}&background=1e3a8a&color=fff&size=400';">
-                
-                @php
-                    $statusColor = match(strtolower($item->status)) {
-                        'baru' => 'bg-blue-600',
-                        'diproses' => 'bg-yellow-500',
-                        'selesai' => 'bg-green-500',
-                        default => 'bg-gray-500'
-                    };
-                @endphp
-                <div class="absolute top-3 right-3 z-20">
-                    <span class="{{ $statusColor }} text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg uppercase tracking-wider backdrop-blur-sm bg-opacity-90">
-                        {{ $item->status }}
-                    </span>
+    <div class="bg-gray-50 dark:bg-gray-900 min-h-screen py-12">
+        <div class="container mx-auto px-4">
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Laporan Bencana</h1>
+                    <p class="text-gray-500 dark:text-gray-400 mt-1">Pantau dan laporkan kejadian bencana di sekitar Anda</p>
                 </div>
-            </div>
-
-            {{-- Konten Card --}}
-            <div class="p-5">
-                <div class="flex justify-between items-center mb-3">
-                    <span class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded-full">
-                        <i class="far fa-clock text-blue-500"></i> {{ $item->created_at->diffForHumans() }}
-                    </span>
-                    <span class="text-xs font-bold text-blue-700 dark:text-blue-300">
-                        {{ ucfirst($item->jenis_bantuan ?? 'Umum') }}
-                    </span>
-                </div>
-
-                <h3 class="text-base font-bold text-gray-800 dark:text-gray-100 mb-2 line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" title="{{ $item->nama_pelapor }}">
-                    {{ $item->nama_pelapor }}
-                </h3>
-
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex items-start gap-2 h-10 overflow-hidden">
-                    <i class="fas fa-map-marker-alt text-red-500 mt-1 flex-shrink-0 animate-bounce"></i>
-                    <span class="line-clamp-2 leading-tight">{{ $item->lokasi }}</span>
-                </p>
-
-                <a href="{{ route('laporan.show', $item->id) }}" class="block w-full text-center bg-white dark:bg-gray-700/50 hover:bg-blue-600 text-blue-600 hover:text-white font-semibold py-2 rounded-lg text-sm transition-all border border-blue-200 dark:border-blue-900 hover:border-blue-600 shadow-sm hover:shadow-md">
-                    Lihat Detail
+                <a href="{{ route('laporan.create') }}" 
+                   class="mt-4 md:mt-0 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-bold flex items-center shadow-lg transition transform hover:-translate-y-1">
+                    <i class="fas fa-exclamation-triangle mr-2"></i> Laporkan Bencana
                 </a>
             </div>
-        </div>
-        @empty
-        <div class="col-span-full flex flex-col items-center justify-center py-16 bg-white/50 dark:bg-gray-800/50 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 animate-fade-in">
-            <div class="bg-blue-50 dark:bg-gray-700 rounded-full w-20 h-20 flex items-center justify-center mb-4 shadow-inner">
-                <i class="fas fa-search text-3xl text-blue-400"></i>
+
+            <!-- Filter Bar -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 mb-8">
+                <form method="GET" action="{{ route('laporan.index') }}" class="flex flex-col lg:flex-row gap-4 justify-between">
+                    <!-- Search -->
+                    <div class="flex-1">
+                        <div class="relative">
+                            <input type="text" name="search" value="{{ request('search') }}" 
+                                class="w-full pl-10 pr-4 py-2.5 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-red-500 focus:border-red-500"
+                                placeholder="Cari lokasi atau judul laporan...">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="flex flex-wrap gap-4">
+                        <select name="category" class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-red-500 focus:border-red-500 py-2.5 px-4">
+                            <option value="all" {{ request('category') == 'all' ? 'selected' : '' }}>Semua Kategori</option>
+                            <option value="bencana" {{ request('category') == 'bencana' ? 'selected' : '' }}>Bencana Alam</option>
+                            <option value="kesehatan" {{ request('category') == 'kesehatan' ? 'selected' : '' }}>Kesehatan</option>
+                            <option value="infrastruktur" {{ request('category') == 'infrastruktur' ? 'selected' : '' }}>Infrastruktur</option>
+                            <option value="sosial" {{ request('category') == 'sosial' ? 'selected' : '' }}>Sosial</option>
+                        </select>
+
+                        <select name="severity" class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-red-500 focus:border-red-500 py-2.5 px-4">
+                            <option value="all" {{ request('severity') == 'all' ? 'selected' : '' }}>Semua Tingkat</option>
+                            <option value="ringan" {{ request('severity') == 'ringan' ? 'selected' : '' }}>Ringan</option>
+                            <option value="sedang" {{ request('severity') == 'sedang' ? 'selected' : '' }}>Sedang</option>
+                            <option value="berat" {{ request('severity') == 'berat' ? 'selected' : '' }}>Berat</option>
+                            <option value="darurat" {{ request('severity') == 'darurat' ? 'selected' : '' }}>Darurat</option>
+                        </select>
+
+                        <select name="status" class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-red-500 focus:border-red-500 py-2.5 px-4">
+                            <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>Semua Status</option>
+                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Menunggu Verifikasi</option>
+                            <option value="verified" {{ request('status') == 'verified' ? 'selected' : '' }}>Terverifikasi</option>
+                            <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
+                        </select>
+
+                        <button type="submit" class="bg-gray-800 hover:bg-gray-900 text-white px-6 py-2.5 rounded-xl font-medium transition">
+                            <i class="fas fa-filter mr-2"></i> Filter
+                        </button>
+                    </div>
+                </form>
             </div>
-            <h3 class="text-lg font-bold text-gray-700 dark:text-gray-200">Data Tidak Ditemukan</h3>
-            <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Coba ubah kata kunci atau filter pencarian kamu.</p>
-            <a href="{{ route('laporan.index') }}" class="mt-4 text-blue-600 hover:underline text-sm font-semibold">Reset Filter</a>
+
+            <!-- Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                @forelse($laporans as $laporan)
+                    <div class="group bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition duration-300 border border-gray-100 dark:border-gray-700 h-full flex flex-col">
+                        <div class="h-48 bg-gray-200 dark:bg-gray-700 relative overflow-hidden flex-shrink-0">
+                            @if($laporan->image_url)
+                                <img src="{{ asset('storage/' . $laporan->image_url) }}" alt="{{ $laporan->title }}"
+                                    class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                            @else
+                                <div class="flex items-center justify-center h-full text-gray-400">
+                                    <i class="fas fa-camera text-3xl"></i>
+                                </div>
+                            @endif
+
+                            <!-- Severity Badge -->
+                            <div class="absolute top-3 right-3">
+                                @php
+                                    $severityColor = match($laporan->severity ?? 'sedang') {
+                                        'ringan' => 'bg-green-500',
+                                        'sedang' => 'bg-yellow-500',
+                                        'berat' => 'bg-orange-500',
+                                        'darurat' => 'bg-red-600 animate-pulse',
+                                        default => 'bg-gray-500'
+                                    };
+                                @endphp
+                                <span class="px-3 py-1 rounded-full text-xs font-bold text-white shadow-sm {{ $severityColor }}">
+                                    {{ ucfirst($laporan->severity ?? 'Sedang') }}
+                                </span>
+                            </div>
+
+                            <!-- Status Badge -->
+                            <div class="absolute top-3 left-3">
+                                @if($laporan->status == 'verified')
+                                    <span class="bg-green-500 text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center shadow-sm">
+                                        <i class="fas fa-check-circle mr-1"></i> Terverifikasi
+                                    </span>
+                                @elseif($laporan->status == 'pending')
+                                    <span class="bg-yellow-500 text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center shadow-sm">
+                                        <i class="fas fa-clock mr-1"></i> Menunggu
+                                    </span>
+                                @else
+                                    <span class="bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center shadow-sm">
+                                        <i class="fas fa-times-circle mr-1"></i> Ditolak
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="p-6 flex flex-col flex-1">
+                            <div class="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                <i class="fas fa-calendar-alt mr-1"></i> {{ $laporan->created_at->format('d M Y, H:i') }}
+                                <span class="mx-2">•</span>
+                                <span class="text-blue-600 dark:text-blue-400 font-medium">{{ ucfirst($laporan->category ?? 'Umum') }}</span>
+                            </div>
+
+                            <h3 class="font-bold text-lg text-gray-800 dark:text-white mb-2 line-clamp-2">
+                                <a href="{{ route('laporan.show', $laporan->id) }}" class="hover:text-red-600 transition">
+                                    {{ $laporan->title }}
+                                </a>
+                            </h3>
+
+                            <div class="flex items-start text-sm text-gray-600 dark:text-gray-300 mb-4">
+                                <i class="fas fa-map-marker-alt text-red-500 mt-1 mr-2 flex-shrink-0"></i>
+                                <span class="line-clamp-2">{{ $laporan->location }}</span>
+                            </div>
+
+                            <div class="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-600 dark:text-gray-300">
+                                        {{ substr($laporan->user->name ?? 'A', 0, 1) }}
+                                    </div>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[100px]">
+                                        {{ $laporan->user->name ?? 'Anonim' }}
+                                    </span>
+                                </div>
+                                <a href="{{ route('laporan.show', $laporan->id) }}" class="text-sm font-semibold text-blue-600 hover:text-blue-700">
+                                    Lihat Detail <i class="fas fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-span-full text-center py-16 bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
+                        <div class="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-search text-2xl text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">Tidak Ada Laporan Ditemukan</h3>
+                        <p class="text-gray-500 mb-6">Coba ubah filter pencarian Anda.</p>
+                        <a href="{{ route('laporan.index') }}" class="text-blue-600 hover:text-blue-700 font-medium">Reset Filter</a>
+                    </div>
+                @endforelse
+            </div>
+
+            <div class="mt-8">
+                {{ $laporans->links() }}
+            </div>
         </div>
-        @endforelse
     </div>
-
-    {{-- 5. FOOTER: Pagination Only --}}
-    <div class="mt-12 flex justify-center pb-8 animate-fade-in" style="animation-delay: 0.5s;">
-         {{ $laporan->links() }}
-    </div>
-
-</div>
-
 @endsection

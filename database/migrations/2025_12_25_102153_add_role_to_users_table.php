@@ -4,18 +4,19 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
             if (!Schema::hasColumn('users', 'role')) {
                 $table->enum('role', [
-                    'masyarakat',
-                    'relawan',
-                    'petugas',
-                    'admin'
-                ])->default('masyarakat')->after('email');
+                    'admin',
+                    'fundraiser',
+                    'donatur'
+                ])->default('donatur')->after('email');
+            }
+            if (!Schema::hasColumn('users', 'wallet_balance')) {
+                $table->decimal('wallet_balance', 15, 2)->default(0)->after('role');
             }
         });
     }

@@ -1,60 +1,124 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\LaporanController;
-use App\Http\Controllers\DashboardController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CampaignController;
+use App\Http\Controllers\DashboardController; // Existing one? Maybe unused now
+use App\Http\Controllers\DonaturController;
+use App\Http\Controllers\FundraiserController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TransactionController;
+use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// Public
 Route::get('/', function () {
-    return view('home');
+    // Show top campaigns on home
+    $campaigns = \App\Models\Campaign::where('status', 'active')->where('is_verified', true)->take(3)->get();
+    return view('home', compact('campaigns'));
 })->name('home');
 
 Route::get('/tentang', function () {
     return view('tentang');
 })->name('tentang');
 
-// --- BAGIAN LAPORAN (DIPERBAIKI) ---
+// Static Pages
+Route::controller(PageController::class)->group(function () {
+    Route::get('/cara-melapor', 'caraMelapor')->name('pages.cara-melapor');
+    Route::get('/syarat-ketentuan', 'syaratKetentuan')->name('pages.terms');
+    Route::get('/kebijakan-privasi', 'kebijakanPrivasi')->name('pages.privacy');
+    Route::get('/faq', 'faq')->name('pages.faq');
+});
 
-// 1. Index
-Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+// Auth Routes (Custom, replacing Breeze/Default for these specific routes)
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// 2. Route Create & Store (HARUS DI ATAS {id})
-Route::get('/laporan/create', [LaporanController::class, 'create'])->name('laporan.create');
-Route::post('/laporan', [LaporanController::class, 'store'])->name('laporan.store');
+// Public Campaign Routes
+Route::get('/campaigns', [CampaignController::class, 'index'])->name('campaigns.index');
+Route::get('/campaigns/{slug}', [CampaignController::class, 'show'])->name('campaigns.show');
+Route::get('/campaigns/{slug}/donate', [CampaignController::class, 'donate'])->name('campaigns.donate');
+Route::post('/campaigns/{slug}/donate', [CampaignController::class, 'storeDonation'])->name('campaigns.storeDonation')->middleware('auth');
+Route::get('/donations/success/{id}', [CampaignController::class, 'success'])->name('donations.success')->middleware('auth');
+Route::post('/campaigns/{slug}/transaction', [TransactionController::class, 'store'])->name('transactions.store');
 
-// 3. Route Export (HARUS DI ATAS {id})
-Route::get('/laporan/export/csv', [LaporanController::class, 'exportCSV'])->name('laporan.exportCSV');
+// Payment Simulation (Public access for callback)
+Route::get('/payment/simulation/{code}', [TransactionController::class, 'simulation'])->name('payment.simulation');
+Route::post('/payment/callback/{code}', [TransactionController::class, 'callback'])->name('payment.callback');
 
-// 4. Route Show/Detail (HARUS PALING BAWAH DI GRUP LAPORAN)
-// Karena {id} menangkap segala sesuatu setelah /laporan/
-Route::get('/laporan/{id}', [LaporanController::class, 'show'])->name('laporan.show');
+// Auth Routes (Breeze/Default)
+require __DIR__ . '/auth.php';
 
-// --- AKHIR BAGIAN LAPORAN ---
+// Authenticated Groups
+Route::middleware(['auth', 'verified'])->group(function () {
 
-Route::get('/register-relawan', [RegisteredUserController::class, 'createRelawan'])->name('register.relawan');
-Route::post('/register-relawan', [RegisteredUserController::class, 'storeRelawan']);
+    // Redirect /dashboard based on role
+    Route::get('/dashboard', function () {
+        $user = auth()->user();
+        if ($user->role === 'admin')
+            return redirect()->route('admin.dashboard');
+        if ($user->role === 'fundraiser')
+            return redirect()->route('fundraiser.dashboard');
+        return redirect()->route('user.dashboard');
+    })->name('dashboard');
 
-// Hapus salah satu route dashboard ini (kamu punya duplikat dashboard).
-// Sebaiknya pakai yang Controller:
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
-
-Route::middleware('auth')->group(function () {
+    // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
 
-Route::prefix('admin')->middleware(['auth'])->group(function () {
-    // ...
-    // HAPUS / GANTI BAGIAN YANG LAMA DENGAN INI:
-    
-    Route::get('/bantuan', [App\Http\Controllers\AdminController::class, 'bantuan'])->name('admin.bantuan');
-    Route::get('/penyaluran', [App\Http\Controllers\AdminController::class, 'penyaluran'])->name('admin.penyaluran');
-    Route::get('/pengaturan', [App\Http\Controllers\AdminController::class, 'pengaturan'])->name('admin.pengaturan');
-});
+    // Laporan (All users can see/create? Or logic specific?)
+    // Allowing all auth users to create reports
+    Route::resource('laporan', LaporanController::class);
 
-require __DIR__.'/auth.php';
+    // --- Role Based Routes ---
+
+    // Admin
+    Route::middleware(['role:admin'])->prefix('admin')->as('admin.')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
+        // Report Management
+        Route::get('/reports', [AdminController::class, 'reports'])->name('reports'); // New Route
+        Route::post('/report/{id}/verify', [AdminController::class, 'verifyReport'])->name('report.verify');
+        Route::post('/report/{id}/reject', [AdminController::class, 'rejectReport'])->name('report.reject');
+        Route::post('/report/{id}/convert', [AdminController::class, 'convertToCampaign'])->name('report.convert');
+
+        // Withdrawal Management
+        Route::post('/withdrawal/{id}/approve', [AdminController::class, 'approveWithdrawal'])->name('withdrawal.approve');
+
+        // User Verification (Relawan)
+        Route::post('/user/{id}/verify', [AdminController::class, 'verifyUser'])->name('user.verify');
+    });
+
+    // Fundraiser
+    Route::middleware(['role:fundraiser'])->prefix('fundraiser')->as('fundraiser.')->group(function () {
+        Route::get('/dashboard', [FundraiserController::class, 'dashboard'])->name('dashboard');
+        Route::post('/withdraw', [FundraiserController::class, 'withdraw'])->name('withdraw');
+        Route::get('/withdrawals', [FundraiserController::class, 'withdrawals'])->name('withdrawals');
+
+        // Campaign Management
+        Route::resource('campaigns', FundraiserController::class)->except(['show', 'index']);
+
+        // Campaign Updates
+        Route::post('/campaigns/{id}/updates', [App\Http\Controllers\CampaignUpdateController::class, 'store'])->name('campaigns.updates.store');
+        Route::delete('/campaigns/updates/{id}', [App\Http\Controllers\CampaignUpdateController::class, 'destroy'])->name('campaigns.updates.destroy');
+    });
+
+
+    // Donatur / Public User
+    Route::middleware(['role:donatur'])->prefix('user')->as('user.')->group(function () {
+        Route::get('/dashboard', [DonaturController::class, 'dashboard'])->name('dashboard');
+        Route::get('/history', [DonaturController::class, 'history'])->name('history');
+    });
+});
