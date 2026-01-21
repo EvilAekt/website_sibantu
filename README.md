@@ -55,7 +55,7 @@ graph LR
     B -->|Tidak Valid| D[Rejected]
     B -->|Butuh Dana| E[Konversi ke Campaign]
     E --> F[Donasi Publik Dibuka]
-
+```
 ## 🔄 Alur Sistem
     
 ### Alur Donasi
