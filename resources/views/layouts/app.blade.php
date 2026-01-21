@@ -294,7 +294,7 @@
                             class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-blue-400 hover:text-white dark:hover:bg-blue-400 transition-all duration-300">
                             <i class="fab fa-twitter"></i>
                         </a>
-                        <a href="#" target="_blank"
+                        <a href="https://www.instagram.com/r_for.rizz" target="_blank"
                             class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-pink-600 hover:text-white dark:hover:bg-pink-600 transition-all duration-300">
                             <i class="fab fa-instagram"></i>
                         </a>

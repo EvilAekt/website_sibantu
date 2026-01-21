@@ -54,13 +54,24 @@
                             <!-- Actions -->
                             @if($report->status == 'pending')
                                 <div class="flex gap-3">
+                                    <!-- Terima/Verifikasi -->
+                                    <form action="{{ route('admin.report.verify', $report->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="bg-green-600 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-green-700 shadow-md transition transform hover:scale-105">
+                                            <i class="fas fa-check mr-1"></i> Terima
+                                        </button>
+                                    </form>
+                                    
+                                    <!-- Konversi ke Kampanye -->
                                     <button onclick="openModal('convertModal{{ $report->id }}')"
                                         class="bg-blue-600 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-blue-700 shadow-md transition transform hover:scale-105">
                                         <i class="fas fa-magic mr-1"></i> Konversi ke Kampanye
                                     </button>
+                                    
+                                    <!-- Tolak -->
                                     <form action="{{ route('admin.report.reject', $report->id) }}" method="POST">
                                         @csrf
-                                        <button class="bg-white border border-red-200 text-red-600 hover:bg-red-50 text-sm px-4 py-2 rounded-lg font-bold transition">
+                                        <button type="submit" class="bg-white border border-red-200 text-red-600 hover:bg-red-50 text-sm px-4 py-2 rounded-lg font-bold transition">
                                             Tolak
                                         </button>
                                     </form>

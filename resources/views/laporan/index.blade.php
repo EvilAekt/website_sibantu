@@ -35,7 +35,7 @@
                     <!-- Filters -->
                     <div class="flex flex-wrap gap-4">
                         <select name="category" class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-red-500 focus:border-red-500 py-2.5 px-4">
-                            <option value="all" {{ request('category') == 'all' ? 'selected' : '' }}>Semua Kategori</option>
+                            <option value="all" {{ request('category') == 'all' || !request('category') ? 'selected' : '' }}>Semua Kategori</option>
                             <option value="bencana" {{ request('category') == 'bencana' ? 'selected' : '' }}>Bencana Alam</option>
                             <option value="kesehatan" {{ request('category') == 'kesehatan' ? 'selected' : '' }}>Kesehatan</option>
                             <option value="infrastruktur" {{ request('category') == 'infrastruktur' ? 'selected' : '' }}>Infrastruktur</option>
@@ -43,7 +43,7 @@
                         </select>
 
                         <select name="severity" class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-red-500 focus:border-red-500 py-2.5 px-4">
-                            <option value="all" {{ request('severity') == 'all' ? 'selected' : '' }}>Semua Tingkat</option>
+                            <option value="all" {{ request('severity') == 'all' || !request('severity') ? 'selected' : '' }}>Semua Tingkat</option>
                             <option value="ringan" {{ request('severity') == 'ringan' ? 'selected' : '' }}>Ringan</option>
                             <option value="sedang" {{ request('severity') == 'sedang' ? 'selected' : '' }}>Sedang</option>
                             <option value="berat" {{ request('severity') == 'berat' ? 'selected' : '' }}>Berat</option>
@@ -51,7 +51,7 @@
                         </select>
 
                         <select name="status" class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-red-500 focus:border-red-500 py-2.5 px-4">
-                            <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>Semua Status</option>
+                            <option value="all" {{ request('status') == 'all' || !request('status') ? 'selected' : '' }}>Semua Status</option>
                             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Menunggu Verifikasi</option>
                             <option value="verified" {{ request('status') == 'verified' ? 'selected' : '' }}>Terverifikasi</option>
                             <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
@@ -60,6 +60,13 @@
                         <button type="submit" class="bg-gray-800 hover:bg-gray-900 text-white px-6 py-2.5 rounded-xl font-medium transition">
                             <i class="fas fa-filter mr-2"></i> Filter
                         </button>
+                        
+                        @if(request()->hasAny(['search', 'category', 'severity', 'status']))
+                            <a href="{{ route('laporan.index') }}" class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 px-6 py-2.5 rounded-xl font-medium transition flex items-center justify-center gap-2">
+                                <i class="fas fa-redo"></i>
+                                <span>Reset</span>
+                            </a>
+                        @endif
                     </div>
                 </form>
             </div>
