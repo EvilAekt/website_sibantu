@@ -47,11 +47,17 @@
 - **Optimized Assets:** Menggunakan Tailwind CSS dan Vite.
 
 ---
+### Pipeline Laporan ke Kampanye
+```mermaid
+graph LR
+    A[User Lapor] -->|Status: Pending| B(Admin Review)
+    B -->|Valid| C[Verified]
+    B -->|Tidak Valid| D[Rejected]
+    B -->|Butuh Dana| E[Konversi ke Campaign]
+    E --> F[Donasi Publik Dibuka]
 
 ## 🔄 Alur Sistem
-
-### Pipeline Laporan ke Kampanye
-
+    
 ### Alur Donasi
 ---
 
@@ -183,3 +189,5 @@ Akses aplikasi di `http://localhost:8000`.
   <br>
   <strong>© 2026</strong>
 </p>
+
+
