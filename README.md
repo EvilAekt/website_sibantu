@@ -18,45 +18,36 @@
 </p>
 
 <p align="center">
+  <a href="#tentang">Tentang</a> •
   <a href="#fitur-utama">Fitur</a> •
-  <a href="#alur-sistem">Alur Sistem</a> •
-  <a href="#struktur-database">Database</a> •
   <a href="#dokumentasi-teknis">Dokumentasi Teknis</a> •
   <a href="#instalasi">Instalasi</a>
 </p>
 
 ---
 
-## 📖 Deskripsi
+## 📖 Tentang
 
-**SiBantu** menghubungkan masyarakat yang membutuhkan pertolongan dengan bantuan kemanusiaan yang terverifikasi. Platform ini mengatasi masalah validitas data bencana dengan sistem verifikasi berjenjang sebelum dikonversi menjadi kampanye donasi publik.
+**SiBantu** adalah platform penghubung masyarakat dengan bantuan kemanusiaan. Sistem ini memvalidasi laporan bencana dari warga sebelum mengubahnya menjadi kampanye donasi publik yang transparan. Solusi ini mengatasi masalah validitas data bencana dan distribusi bantuan yang tidak merata.
 
 ## 🚀 Fitur Utama
 
 ### 1. Pelaporan Bencana (Crowdsourcing)
-* **Laporan Warga:** User membuat laporan dengan bukti foto, lokasi, dan tingkat keparahan.
-* **Verifikasi Admin:** Admin memvalidasi laporan sebelum publikasi.
-* **Konversi Kampanye:** Laporan valid dapat langsung dikonversi menjadi kampanye donasi.
+- **Laporan Warga:** Upload foto kejadian, lokasi, dan deskripsi.
+- **Verifikasi Admin:** Filter laporan valid/hoax sebelum publikasi.
+- **Konversi Kampanye:** Ubah laporan valid langsung menjadi galang dana.
 
-### 2. Penggalangan Dana (Campaign)
-* **Transparansi:** Tracking progress donasi secara real-time.
-* **Manajemen Fundraiser:** Dashboard khusus bagi penggalang dana untuk mengelola kampanye.
-* **Withdrawal System:** Sistem penarikan dana dengan approval admin.
+### 2. Ekosistem Donasi
+- **Tracking Real-time:** Pantau progress dana terkumpul.
+- **Multi-Role:** Akses khusus untuk Admin, Fundraiser, dan Donatur.
+- **Withdrawal System:** Penarikan dana aman dengan persetujuan admin.
 
-### 3. Keamanan & Peran (Role-Based)
-* **Admin:** Kontrol penuh (Verifikasi User, Laporan, Withdrawal).
-* **Fundraiser:** Membuat kampanye dan menarik dana.
-* **Donatur:** Melapor bencana dan berdonasi.
+### 3. Keamanan & Performa
+- **Role-Based Access Control (RBAC):** Middleware keamanan berlapis.
+- **Optimized Assets:** Menggunakan Tailwind CSS dan Vite.
 
 ---
 
 ## 🔄 Alur Sistem
 
 ### Pipeline Laporan ke Kampanye
-```mermaid
-graph LR
-    A[User Lapor] -->|Status: Pending| B(Admin Review)
-    B -->|Valid| C[Verified]
-    B -->|Tidak Valid| D[Rejected]
-    B -->|Butuh Dana| E[Konversi ke Campaign]
-    E --> F[Donasi Publik Dibuka]
